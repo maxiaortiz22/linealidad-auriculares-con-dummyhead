@@ -34,13 +34,50 @@ def calcular():
 
     file_name = file_name_entry.get()
 
+    """
+    writer = pd.ExcelWriter(f'{file_name}.xlsx', engine='xlsxwriter')
+
+    workbook  = writer.book
+
+    bg_color = ['#C71C05', '#CF6F0F', '#EFC439', '#EFE55F', '#A6EB29', '#31A711', '#15A34E',
+                '#15C1AD', '#107498', '#242CD2', '#8C23D3', '#D75FC0', '#D75F65']
+    
+    cols = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']
+
+    columns = ['40 dBHL', '37.5 dBHL', '35 dBHL', '32.5 dBHL', '30 dBHL', '27.5 dBHL', '25 dBHL', '22.5 dBHL',
+               '20 dBHL', '17.5 dBHL', '15 dBHL', '12.5 dBHL', '10 dBHL']
+
+    levels = [40, 37.5, 35, 32.5, 30, 27.5, 25, 22.5, 20, 17.5, 15, 12.5, 10]
+
+    for i, key in enumerate(test.keys()):
+        test[key].to_excel(writer, sheet_name=key)
+
+        worksheet = writer.sheets[key]
+
+        for c, col in enumerate(columns):
+            worksheet.conditional_format(f'{cols[c]}1', {'type': 'cell',
+                                         'criteria': '==',
+                                         'value': col,
+                                         'format': workbook.add_format({'bg_color': bg_color[c]})})
+
+        for c, level in enumerate(levels):
+            worksheet.conditional_format('B2:N7', {'type': 'cell',
+                                         'criteria': 'between',
+                                         'minimum': level - 0.5,
+                                         'maximum': level + 0.5,
+                                         'format': workbook.add_format({'bg_color': bg_color[c]})})
+    
+
+    writer.save()
+    """
+
     writer = pd.ExcelWriter(f'{file_name}.xlsx', engine='xlsxwriter')
 
     for key in test.keys():
         test[key].to_excel(writer, sheet_name=key)
 
     writer.save()
-
+    
     progress_label.set("Valores guardados!")
     root.update_idletasks()
 

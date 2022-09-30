@@ -127,7 +127,7 @@ def linealidad(cal, data, sr, auricular):
         
         aux = []
 
-    columns = ['40 dBHL', '37.5 dBHL', '35 dBHL', '32.5 dBHL', '30 dBHL', '27.5 dBHL', '25 dBHL', '22.5 dBHL'
+    columns = ['40 dBHL', '37.5 dBHL', '35 dBHL', '32.5 dBHL', '30 dBHL', '27.5 dBHL', '25 dBHL', '22.5 dBHL',
                '20 dBHL', '17.5 dBHL', '15 dBHL', '12.5 dBHL', '10 dBHL']
 
     INDEX = ['15 Gain', '14 Gain', '13 Gain', '12 Gain', '11 Gain', '10 Gain']
@@ -136,7 +136,7 @@ def linealidad(cal, data, sr, auricular):
     aux_dic = {}
     i=0
     for key in trimm_global_dB_norm.keys():
-        for t in range(int(len(trimm_global_dB_norm[key])/len(INDEX))-1):
+        for t in range(int(len(trimm_global_dB_norm[key])/len(INDEX))):
 
             #assert len(columns) == int(len(trimm_global_dB_norm[key])/len(INDEX))
 
