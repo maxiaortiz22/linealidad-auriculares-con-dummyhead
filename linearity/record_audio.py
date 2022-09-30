@@ -13,26 +13,25 @@ para guardar el audio!!!
 
 from sys import byteorder
 from array import array
-import numpy as np
-from scipy.signal import sosfilt
-import os
+from struct import pack
 
 import pyaudio
+import wave
 import sounddevice as sd
 from scipy.io.wavfile import write
 
 #Detector de sonido en 16 bits:
 THRESHOLD = 5#30 #500 el original
-CHUNK_SIZE_silence = 1024
+CHUNK_SIZE_silence = 256
 FORMAT_silence = pyaudio.paInt16
 RATE_silence = 44100
 
 #Grabación en 32 bits flotantes:
 CHANNELS = 1
 RATE = 44100
+#RECORD_SECONDS = 5
+#WAVE_OUTPUT_FILENAME = "veo_si_sirve.wav"
 
-THRESHOLD = THRESHOLD / 32767 #Divido por el máximo 16-bit value
-sos = np.load(f"linearity/sos.npy")
 
 def is_silent(snd_data):
     "Returns 'True' if below the 'silent' threshold"
@@ -43,24 +42,35 @@ def record(RECORD_SECONDS, sr=44100):
     """
     Detect when a signal appears and start recording
     """
+    p_silence = pyaudio.PyAudio()
+    stream = p_silence.open(format=FORMAT_silence, channels=1, rate=RATE_silence,
+        input=True, output=True,
+        frames_per_buffer=CHUNK_SIZE_silence)
+
+    r_silence = array('h')
 
     while 1:
-        silenceRecording = sd.rec(CHUNK_SIZE_silence, samplerate=RATE_silence,
-                     channels=CHANNELS, blocking=True, dtype='float32')
-        #sd.wait()
         # little endian, signed short
-        audio = sosfilt(sos, silenceRecording)
-        #audio = audio/np.max(np.abs(audio))
-        silent = is_silent(audio)
+        snd_data = array('h', stream.read(CHUNK_SIZE_silence))
+        if byteorder == 'big':
+            snd_data.byteswap()
+        r_silence.extend(snd_data)
+
+        silent = is_silent(snd_data)
 
         if silent == False:
             break #Mato el loop cuando paso el umbral
+
+    
+    #sample_width_silence = p_silence.get_sample_size(FORMAT_silence)
+    stream.stop_stream()
+    stream.close()
+    p_silence.terminate()
 
     print('Señal detectada! Comienza grabación')
 
     myrecording = sd.rec(int(RECORD_SECONDS * sr), samplerate=sr,
                      channels=CHANNELS, blocking=True, dtype='float32')
-    #sd.wait()
 
     #write('test_JBL750.wav', RATE, myrecording)
     return myrecording, sr

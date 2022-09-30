@@ -32,38 +32,25 @@ def tone(sr, frec, tone_type, gain, chanel, buffer):
 
     return tono
 
-def linearity_tone_test(tone_type, chanel, buffer, sr):
-    freqs = [125, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 6000, 8000]
-    gains = [-40, -37.5, -35, -32.5, -30, -27.5, -25, -22.5,
-               -20, -17.5, -15, -12.5, -10]*6
-    comp = [30.5, 18, 11, 6,  5.5, 5.5, 4.5, 2.5, 9.5, 17, 17.5]
-
-    audio = np.array([])
-    cal = []
-    for i, frec in enumerate(freqs):
-        for gain in gains:
-            tono = np.array(tone(sr, frec, tone_type, gain, chanel, buffer))
-            audio = np.append(audio, tono)
-
-            cal_data = np.array(tone(sr, frec, tone_type, gain, chanel, buffer))
-            rms_1Pa = RMS_cal(cal_data, nivel_dBHL=50, comp=comp[i])
-            cal.append(rms_1Pa)
-    
-    return audio, cal
-
 
 if __name__ == '__main__':
-    from linearity import linealidad
+    from scipy.signal import sosfilt
+
     # Defino los parámetros:
-    sr = 48000 # Frecuencia de sampleo [Hz]
+    sr = 44100 # Frecuencia de sampleo [Hz]
     frec = 1000 # Frecuencia [Hz]
-    tone_type = tone_generator.LINEARITY_TEST # Tipo de tono
+    tone_type = tone_generator.CONTINUOUS_TONE # Tipo de tono
     gain = 0 # Ganancia en dBFs
     chanel = 0x4 # Canal izquierdo = 0x4, Canal derecho = 0x5
     audio_seconds = 2 #Segundos de audio que quiero
-    buffer = int(sr*audio_seconds*2) #(frecuencia de sampleo)*(segundos de audio)*(canales)
+    buffer = 256#int(sr*audio_seconds*2) #(frecuencia de sampleo)*(segundos de audio)*(canales)
 
     #Genero el test:
-    data, cal = linearity_tone_test(tone_type, chanel, buffer, sr)
+    data = tone(sr, frec, tone_type, gain, chanel, buffer)
+    
+    print(np.max(data))
 
-    result = linealidad(cal, data, sr, auricular="Circumaural (ej: JBL750)")
+    sos = np.load(f"sos.npy")
+    filtered_data = sosfilt(sos, data)
+
+    print(np.max(filtered_data))

@@ -34,9 +34,10 @@ def calcular():
 
     file_name = file_name_entry.get()
 
-    writer = pd.ExcelWriter( file_name + '.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter(f'{file_name}.xlsx', engine='xlsxwriter')
 
-    test.to_excel(writer, sheet_name='Linealidad')
+    for key in test.keys():
+        test[key].to_excel(writer, sheet_name=key)
 
     writer.save()
 
@@ -101,7 +102,7 @@ def record_data():
     root.update_idletasks()
 
     # La variable record_seconds va a tener que ser 2*Cantidad_De_Pasos_En_Cada_Frecuencia
-    record_seconds = 11*2 # [saltos_de_nivel]*[segundos_por_paso]
+    record_seconds = 78*2 # [saltos_de_nivel]*[segundos_por_paso]
                           # [125,250...,8000]*[ 2[s] ]
 
     cant_de_frecuencias = 11

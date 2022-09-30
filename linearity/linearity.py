@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import sys
-from scipy.fft import fft, fftfreq, rfft, rfftfreq
+from scipy.fft import rfft, rfftfreq
 
 #Recomendable: calibrar con un tono de 65 dBHL a 1kHz
 
@@ -36,7 +36,7 @@ def linealidad(cal, data, sr, auricular):
     audios = {}
     
     i=0
-    recorte = int(11*2*sr) #[pasos][segundos_grabacion][sr] = [muestras_por_frecuencia] no sera 12?
+    recorte = int(78*2*sr) #[pasos][segundos_grabacion][sr] = [muestras_por_frecuencia] no sera 12?
     for cal_i, f in enumerate(frec):
         #Separo la data por frecuencia y los calibro a dBSPL:
         audios[str(f)] = data[int(i) : int(i + recorte)] / cal[cal_i] #calibration
@@ -117,21 +117,39 @@ def linealidad(cal, data, sr, auricular):
         if auricular == 'Supraural (ej: JBL600)':
             for i in range(len(trimm_global_dB[key])):
                 aux.append(np.round_(trimm_global_dB[key][i] - supraural_comp[key])[0])
-            trimm_global_dB_norm[key+' Hz'] = aux
+            trimm_global_dB_norm[key+'Hz'] = aux
         elif auricular == "Circumaural (ej: JBL750)":
             for i in range(len(trimm_global_dB[key])):
                 aux.append(np.round_(trimm_global_dB[key][i] - circumaural_comp[key])[0])
-            trimm_global_dB_norm[key+' Hz'] = aux
+            trimm_global_dB_norm[key+'Hz'] = aux
         else:
             raise TypeError("No cargaste ningún auricular")
         
         aux = []
 
-    INDEX = ['40 dBHL', '35 dBHL', '30 dBHL', '25 dBHL', "20 dBHL",
-             '15 dBHL', '10 dBHL', '5 dBHL' , '0 dBHL' , "-5 dBHL", "-10 dBHL"]
+    columns = ['40 dBHL', '37.5 dBHL', '35 dBHL', '32.5 dBHL', '30 dBHL', '27.5 dBHL', '25 dBHL', '22.5 dBHL'
+               '20 dBHL', '17.5 dBHL', '15 dBHL', '12.5 dBHL', '10 dBHL']
 
-    test = pd.DataFrame(data=trimm_global_dB_norm, index=INDEX)
+    INDEX = ['15 Gain', '14 Gain', '13 Gain', '12 Gain', '11 Gain', '10 Gain']
 
-    print(test)
+    df_dict = {}
+    aux_dic = {}
+    i=0
+    for key in trimm_global_dB_norm.keys():
+        for t in range(int(len(trimm_global_dB_norm[key])/len(INDEX))-1):
 
-    return test
+            #assert len(columns) == int(len(trimm_global_dB_norm[key])/len(INDEX))
+
+            aux_dic[columns[t]] = trimm_global_dB_norm[key][i:(i+len(INDEX))]
+            print(aux_dic)
+            i+=len(INDEX)
+
+        df_dict[key] = pd.DataFrame(data=aux_dic, index=INDEX)
+        aux_dic = {}
+        i=0     
+
+    #test = pd.DataFrame(data=trimm_global_dB_norm, index=INDEX)
+
+    print(df_dict)
+
+    return df_dict
